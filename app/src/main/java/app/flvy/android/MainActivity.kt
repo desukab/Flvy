@@ -135,9 +135,10 @@ class MainActivity : Activity() {
                     }
                     1 -> setLiveWallpaper()
                     2 -> openLocationSettings()
-                    3 -> chooseMedia()
-                    4 -> openAppSettings()
-                    5 -> immersive()
+                    3 -> openNotificationSettings()
+                    4 -> chooseMedia()
+                    5 -> openAppSettings()
+                    6 -> immersive()
                 }
             }
             .setNegativeButton("Close", null)
