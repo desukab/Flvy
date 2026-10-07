@@ -14,4 +14,6 @@ android {
     }
     buildTypes { release { isMinifyEnabled=false; isDebuggable=false } }
 }
+dependencies { implementation("androidx.webkit:webkit:1.12.1") }
+
 kotlin { jvmToolchain(17) }
