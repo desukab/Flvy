@@ -1,46 +1,68 @@
 package app.flvy.android
 
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
+import android.view.View
 import android.view.WindowManager
-import android.widget.Toast
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebView
+import androidx.webkit.WebViewAssetLoader
+import androidx.webkit.WebViewClientCompat
 
 class MainActivity : Activity() {
-    private lateinit var board: SplitFlapView
+    private lateinit var web: WebView
+
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        hideSystemUi()
-        board=SplitFlapView(this)
-        MainActivityHolder.board=board
-        setContentView(board)
-        board.setOnLongClickListener {
-            try { startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")) }
-            catch (_: Exception) { startActivity(Intent(Settings.ACTION_SETTINGS)) }
-            Toast.makeText(this,"Enable FLVY notifications, then return here",Toast.LENGTH_LONG).show()
-            true
+        immersive()
+
+        web = WebView(this).apply {
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.mediaPlaybackRequiresUserGesture = false
+            settings.allowFileAccess = false
+            settings.allowContentAccess = false
+            settings.setSupportZoom(false)
+            val loader = WebViewAssetLoader.Builder()
+                .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this@MainActivity))
+                .build()
+            webViewClient = object : WebViewClientCompat() {
+                override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? =
+                    loader.shouldInterceptRequest(request.url)
+                @Suppress("DEPRECATION")
+                override fun shouldInterceptRequest(view: WebView, url: String): WebResourceResponse? =
+                    loader.shouldInterceptRequest(android.net.Uri.parse(url))
+            }
         }
-        tick()
+        setContentView(web)
+        web.loadUrl("https://appassets.androidplatform.net/assets/splitflap/index.html?kiosk=1")
     }
-    override fun onResume(){ super.onResume(); hideSystemUi() }
-    override fun onDestroy(){ MainActivityHolder.board=null; super.onDestroy() }
-    private fun tick(){
-        val now=Date()
-        board.setClock(
-            SimpleDateFormat("HH:mm",Locale.getDefault()).format(now),
-            SimpleDateFormat("EEE  dd  MMM",Locale.getDefault()).format(now).uppercase(Locale.getDefault())
-        )
-        board.postDelayed({ if (!isFinishing) tick() },1000)
+
+    override fun onResume() {
+        super.onResume()
+        immersive()
+        web.onResume()
     }
-    private fun hideSystemUi(){
-        window.decorView.systemUiVisibility=
-            android.view.View.SYSTEM_UI_FLAG_FULLSCREEN or android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-            android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-            android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+
+    override fun onPause() {
+        web.onPause()
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        web.destroy()
+        super.onDestroy()
+    }
+
+    private fun immersive() {
+        window.decorView.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_FULLSCREEN or
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
     }
 }
