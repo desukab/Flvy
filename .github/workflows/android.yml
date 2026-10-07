@@ -8,6 +8,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Vendor upstream MIT split-flap engine
+        run: |
+          rm -rf app/src/main/assets/splitflap
+          mkdir -p app/src/main/assets
+          git clone --depth 1 https://github.com/MMacLaine/split-flap.git app/src/main/assets/splitflap
+          rm -rf app/src/main/assets/splitflap/.git
+          test -f app/src/main/assets/splitflap/src/renderer.js
+          test -f app/src/main/assets/splitflap/src/charset.js
+          test -f app/src/main/assets/splitflap/index.html
       - uses: actions/setup-java@v5
         with: { distribution: temurin, java-version: '17' }
       - uses: android-actions/setup-android@v3
@@ -22,10 +31,10 @@ jobs:
       - name: Sign and verify
         run: |
           $ANDROID_HOME/build-tools/35.0.0/zipalign -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk app-release-aligned.apk
-          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks flvy-test.keystore --ks-pass pass:flvytest --key-pass pass:flvytest --out FLVY-0.1.0-test-signed.apk app-release-aligned.apk
-          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose FLVY-0.1.0-test-signed.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks flvy-test.keystore --ks-pass pass:flvytest --key-pass pass:flvytest --out FLVY-0.2.0-test-signed.apk app-release-aligned.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose FLVY-0.2.0-test-signed.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: FLVY-0.1.0-test-signed
-          path: FLVY-0.1.0-test-signed.apk
+          name: FLVY-0.2.0-test-signed
+          path: FLVY-0.2.0-test-signed.apk
           retention-days: 14
