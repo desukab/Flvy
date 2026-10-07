@@ -24,7 +24,7 @@ jobs:
           curl -L --fail --retry 3 -o app/src/main/assets/Fredoka.ttf             https://raw.githubusercontent.com/PanicKk/Fredoka-Font/main/static/Fredoka-SemiBold.ttf
           curl -L --fail --retry 3 -o app/src/main/assets/Fredoka-OFL.txt             https://raw.githubusercontent.com/PanicKk/Fredoka-Font/main/OFL.txt
           command -v convert >/dev/null || (sudo apt-get update && sudo apt-get install -y imagemagick)
-          convert -size 108x108 xc:none -font app/src/main/assets/Fredoka.ttf             -fill black -pointsize 29 -gravity center -kerning 0 -annotate +0+0 "FLVY"             app/src/main/res/drawable/ic_launcher_foreground.png
+          convert -size 108x108 xc:none -font app/src/main/assets/Fredoka.ttf             -fill black -pointsize 29 -gravity center -kerning 0 -annotate +0+0 "FLVY"             app/src/main/res/drawable/ic_launcher_flvy.png
       - uses: actions/setup-java@v5
         with: { distribution: temurin, java-version: '17' }
       - uses: android-actions/setup-android@v3
