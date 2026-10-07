@@ -3,6 +3,7 @@ package app.flvy.android
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.WallpaperManager
+import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Intent
@@ -32,6 +33,7 @@ class MainActivity : Activity() {
     private lateinit var root: FrameLayout
     private var fileCallback: ValueCallback<Array<Uri>>? = null
     private var pendingPlaceJson: String? = null
+    private var pageReady = false
 
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
@@ -64,6 +66,14 @@ class MainActivity : Activity() {
                     view: WebView,
                     url: String
                 ): WebResourceResponse? = loader.shouldInterceptRequest(Uri.parse(url))
+
+                override fun onPageFinished(view: WebView, url: String) {
+                    pageReady = true
+                    pendingPlaceJson?.let {
+                        injectPlace(it)
+                        pendingPlaceJson = null
+                    }
+                }
             }
 
             webChromeClient = object : WebChromeClient() {
