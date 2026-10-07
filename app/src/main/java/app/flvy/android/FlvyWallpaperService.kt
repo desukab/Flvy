@@ -2,7 +2,9 @@ package app.flvy.android
 
 import android.graphics.Canvas
 import android.graphics.Color
+import android.os.Build
 import android.service.wallpaper.WallpaperService
+import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.View
 import android.webkit.WebResourceRequest
@@ -15,7 +17,7 @@ import androidx.webkit.WebViewAssetLoader
 
 /**
  * Live wallpaper uses the same MacLaine split-flap WebView engine as the main FLVY screen.
- * There is deliberately no second/native clock renderer here.
+ * Rendering is fast only while flaps are moving, then drops to a low-rate refresh.
  */
 class FlvyWallpaperService : WallpaperService() {
     override fun onCreateEngine(): Engine = FlvyEngine()
@@ -28,12 +30,28 @@ class FlvyWallpaperService : WallpaperService() {
         private var host: FrameLayout? = null
         private var surfaceWidth = 1
         private var surfaceHeight = 1
+        private var animating = false
+
+        private val pollIdle = object : Runnable {
+            override fun run() {
+                if (!visible || destroyed) return
+                val w = web ?: return
+                w.evaluateJavascript(
+                    "window.__flvyBoardIdle ? window.__flvyBoardIdle() : true"
+                ) { value ->
+                    if (!visible || destroyed) return
+                    animating = value != "true"
+                    scheduleRender()
+                }
+                handler.postDelayed(this, 100L)
+            }
+        }
 
         private val redraw = object : Runnable {
             override fun run() {
                 if (!visible || destroyed) return
                 render()
-                handler.postDelayed(this, 1000L)
+                scheduleRender()
             }
         }
 
@@ -45,9 +63,12 @@ class FlvyWallpaperService : WallpaperService() {
         override fun onVisibilityChanged(isVisible: Boolean) {
             visible = isVisible
             handler.removeCallbacks(redraw)
+            handler.removeCallbacks(pollIdle)
             if (isVisible) {
                 createWebView()
+                setPreferredFrameRate()
                 render()
+                handler.post(pollIdle)
                 handler.post(redraw)
             }
         }
@@ -57,11 +78,13 @@ class FlvyWallpaperService : WallpaperService() {
             surfaceWidth = width.coerceAtLeast(1)
             surfaceHeight = height.coerceAtLeast(1)
             layoutWebView()
+            setPreferredFrameRate()
             if (visible) render()
         }
 
         override fun onSurfaceDestroyed(holder: SurfaceHolder) {
             handler.removeCallbacks(redraw)
+            handler.removeCallbacks(pollIdle)
             super.onSurfaceDestroyed(holder)
         }
 
@@ -69,8 +92,30 @@ class FlvyWallpaperService : WallpaperService() {
             destroyed = true
             visible = false
             handler.removeCallbacks(redraw)
+            handler.removeCallbacks(pollIdle)
             destroyWebView()
             super.onDestroy()
+        }
+
+        private fun scheduleRender() {
+            handler.removeCallbacks(redraw)
+            // 30 fps only while the real split-flap engine is animating.
+            // Static content is refreshed twice per second to catch clock/page changes.
+            handler.postDelayed(redraw, if (animating) 33L else 500L)
+        }
+
+        private fun setPreferredFrameRate() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                try {
+                    surfaceHolder.surface.setFrameRate(
+                        30f,
+                        Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
+                        Surface.CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS
+                    )
+                } catch (_: Exception) {
+                    // Some OEM wallpaper surfaces do not expose frame-rate hints.
+                }
+            }
         }
 
         private fun createWebView() {
