@@ -14,7 +14,7 @@ class SplitFlapView(context: Context): View(context) {
     init { setBackgroundColor(Color.BLACK); isClickable=true; isLongClickable=true }
     fun setClock(t:String,d:String){time=t;date=d;invalidate()}
     fun showNotification(title:String,body:String){
-        val s=(if(title.isBlank()) body else "$title  ·  $body").replace("\n"," ").replace(Regex("\s+")," ").trim()
+        val s=(if(title.isBlank()) body else "$title  ·  $body").replace("\n"," ").replace(Regex("\\s+")," ").trim()
         if(s.isNotBlank()){notice=s.take(42).uppercase();until=System.currentTimeMillis()+7000;invalidate()}
     }
     override fun onDraw(c:Canvas){
