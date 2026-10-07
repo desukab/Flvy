@@ -21,13 +21,17 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.widget.Button
 import android.widget.FrameLayout
+import org.json.JSONObject
 import androidx.webkit.WebViewAssetLoader
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.webkit.WebViewClientCompat
 
 class MainActivity : Activity() {
     private lateinit var web: WebView
     private lateinit var root: FrameLayout
     private var fileCallback: ValueCallback<Array<Uri>>? = null
+    private var pendingPlaceJson: String? = null
 
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
@@ -106,12 +110,15 @@ class MainActivity : Activity() {
         // schedules and help must remain reachable from inside the app.
         web.loadUrl("https://appassets.androidplatform.net/assets/splitflap/index.html")
         FlvyWebBridge.attach(web)
+        if (FlvyLocation.hasPermission(this)) FlvyLocation.resolve(this, ::applyPlace)
+        else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION), FlvyLocation.REQUEST_CODE)
     }
 
     private fun showControlCenter() {
         val items = arrayOf(
             "Customize screens / editor",
             "Set as live wallpaper",
+            "Location / Indian weather",
             "Notifications",
             "Choose media / storage",
             "Android app permissions",
@@ -127,7 +134,7 @@ class MainActivity : Activity() {
                         immersive()
                     }
                     1 -> setLiveWallpaper()
-                    2 -> openNotificationSettings()
+                    2 -> openLocationSettings()
                     3 -> chooseMedia()
                     4 -> openAppSettings()
                     5 -> immersive()
@@ -149,6 +156,20 @@ class MainActivity : Activity() {
         } catch (_: ActivityNotFoundException) {
             startActivity(Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER))
         }
+    }
+
+    private fun openLocationSettings() {
+        if (FlvyLocation.hasPermission(this)) FlvyLocation.resolve(this, ::applyPlace)
+        else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION), FlvyLocation.REQUEST_CODE)
+    }
+
+    private fun applyPlace(json: String) {
+        pendingPlaceJson = json
+        if (pageReady) { injectPlace(json); pendingPlaceJson = null }
+    }
+
+    private fun injectPlace(json: String) {
+        web.evaluateJavascript("localStorage.setItem('sf_place', " + JSONObject.quote(json) + "); location.reload();", null)
     }
 
     private fun openNotificationSettings() {
@@ -185,6 +206,11 @@ class MainActivity : Activity() {
                 data = Uri.parse("package:$packageName")
             }
         )
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == FlvyLocation.REQUEST_CODE && FlvyLocation.hasPermission(this)) FlvyLocation.resolve(this, ::applyPlace)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
