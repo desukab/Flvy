@@ -39,9 +39,10 @@ class FlvyWallpaperService : WallpaperService() {
                 w.evaluateJavascript(
                     "window.__flvyBoardIdle ? window.__flvyBoardIdle() : true"
                 ) { value ->
-                    if (!visible || destroyed) return
-                    animating = value != "true"
-                    scheduleRender()
+                    if (visible && !destroyed) {
+                        animating = value != "true"
+                        scheduleRender()
+                    }
                 }
                 handler.postDelayed(this, 100L)
             }
