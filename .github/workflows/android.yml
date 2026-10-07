@@ -14,6 +14,7 @@ jobs:
           mkdir -p app/src/main/assets
           git clone --depth 1 https://github.com/MMacLaine/split-flap.git app/src/main/assets/splitflap
           rm -rf app/src/main/assets/splitflap/.git
+          git -C app/src/main/assets/splitflap apply ../../../../../patches/maclaine-notifications.patch
           test -f app/src/main/assets/splitflap/src/renderer.js
           test -f app/src/main/assets/splitflap/src/charset.js
           test -f app/src/main/assets/splitflap/index.html
