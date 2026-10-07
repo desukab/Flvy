@@ -3,5 +3,5 @@
     <string name="app_name">FLVY</string>
     <string name="notification_listener_label">FLVY notification access</string>
     <string name="wallpaper_name">FLVY Split-Flap</string>
-    <string name="wallpaper_description">A pitch-black AMOLED split-flap clock wallpaper.</string>
+    <string name="wallpaper_description">The FLVY split-flap display for AMOLED wallpapers.</string>
 </resources>
