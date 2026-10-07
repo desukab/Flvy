@@ -16,8 +16,8 @@ import android.widget.FrameLayout
 import androidx.webkit.WebViewAssetLoader
 
 /**
- * Live wallpaper uses the same MacLaine split-flap WebView engine as the main FLVY screen.
- * Rendering is fast only while flaps are moving, then drops to a low-rate refresh.
+ * Same MacLaine split-flap engine as FLVY's main screen.
+ * The renderer is active while flaps move and throttles aggressively when idle.
  */
 class FlvyWallpaperService : WallpaperService() {
     override fun onCreateEngine(): Engine = FlvyEngine()
@@ -36,15 +36,13 @@ class FlvyWallpaperService : WallpaperService() {
             override fun run() {
                 if (!visible || destroyed) return
                 val w = web ?: return
-                w.evaluateJavascript(
-                    "window.__flvyBoardIdle ? window.__flvyBoardIdle() : true"
-                ) { value ->
+                w.evaluateJavascript("window.__flvyBoardIdle ? window.__flvyBoardIdle() : true") { value ->
                     if (visible && !destroyed) {
                         animating = value != "true"
                         scheduleRender()
                     }
                 }
-                handler.postDelayed(this, 100L)
+                handler.postDelayed(this, if (lowPower()) 350L else 120L)
             }
         }
 
@@ -98,11 +96,19 @@ class FlvyWallpaperService : WallpaperService() {
             super.onDestroy()
         }
 
+        private fun lowPower(): Boolean =
+            getSharedPreferences("flvy", MODE_PRIVATE).getBoolean("low_power", true)
+
         private fun scheduleRender() {
             handler.removeCallbacks(redraw)
-            // 30 fps only while the real split-flap engine is animating.
-            // Static content is refreshed twice per second to catch clock/page changes.
-            handler.postDelayed(redraw, if (animating) 33L else 500L)
+            // Smooth 30fps during flap motion. Once idle, render only often enough to
+            // catch clocks/page rotation. Low-power mode stretches that idle interval.
+            val delay = when {
+                animating -> 33L
+                lowPower() -> 1500L
+                else -> 500L
+            }
+            handler.postDelayed(redraw, delay)
         }
 
         private fun setPreferredFrameRate() {
@@ -113,25 +119,17 @@ class FlvyWallpaperService : WallpaperService() {
                         Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
                         Surface.CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS
                     )
-                } catch (_: Exception) {
-                    // Some OEM wallpaper surfaces do not expose frame-rate hints.
-                }
+                } catch (_: Exception) { }
             }
         }
 
         private fun createWebView() {
             if (web != null || destroyed) return
-
             val assetLoader = WebViewAssetLoader.Builder()
-                .addPathHandler(
-                    "/assets/",
-                    WebViewAssetLoader.AssetsPathHandler(this@FlvyWallpaperService)
-                )
+                .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this@FlvyWallpaperService))
                 .build()
 
-            host = FrameLayout(this@FlvyWallpaperService).apply {
-                setBackgroundColor(Color.BLACK)
-            }
+            host = FrameLayout(this@FlvyWallpaperService).apply { setBackgroundColor(Color.BLACK) }
 
             web = WebView(this@FlvyWallpaperService).apply {
                 setBackgroundColor(Color.BLACK)
@@ -141,30 +139,16 @@ class FlvyWallpaperService : WallpaperService() {
                 settings.allowContentAccess = false
                 settings.setSupportZoom(false)
                 webViewClient = object : WebViewClient() {
-                    override fun shouldInterceptRequest(
-                        view: WebView,
-                        request: WebResourceRequest
-                    ): WebResourceResponse? = assetLoader.shouldInterceptRequest(request.url)
-
+                    override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? =
+                        assetLoader.shouldInterceptRequest(request.url)
                     @Suppress("DEPRECATION")
-                    override fun shouldInterceptRequest(
-                        view: WebView,
-                        url: String
-                    ): WebResourceResponse? = assetLoader.shouldInterceptRequest(Uri.parse(url))
+                    override fun shouldInterceptRequest(view: WebView, url: String): WebResourceResponse? =
+                        assetLoader.shouldInterceptRequest(Uri.parse(url))
                 }
             }
 
-            host!!.addView(
-                web,
-                FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT
-                )
-            )
-
+            host!!.addView(web, FrameLayout.LayoutParams(-1, -1))
             layoutWebView()
-
-            // Kiosk keeps editor chrome out of the wallpaper. The board itself is the wallpaper.
             web!!.loadUrl("https://appassets.androidplatform.net/assets/splitflap/index.html?kiosk=1")
         }
 
@@ -186,12 +170,7 @@ class FlvyWallpaperService : WallpaperService() {
         private fun render() {
             val holder = surfaceHolder
             if (!holder.surface.isValid) return
-            val canvas: Canvas = try {
-                holder.lockCanvas()
-            } catch (_: Exception) {
-                null
-            } ?: return
-
+            val canvas: Canvas = try { holder.lockCanvas() } catch (_: Exception) { null } ?: return
             try {
                 canvas.drawColor(Color.BLACK)
                 web?.invalidate()
