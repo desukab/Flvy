@@ -4,11 +4,37 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path android:fillColor="#D7A84B" android:pathData="M22,18h64a8,8 0,0 1,8 8v56a8,8 0,0 1,-8 8h-64a8,8 0,0 1,-8 -8v-56a8,8 0,0 1,8 -8z"/>
-    <path android:fillColor="#050505" android:pathData="M24,23h60a4,4 0,0 1,4 4v20h-68v-20a4,4 0,0 1,4 -4z"/>
-    <path android:fillColor="#050505" android:pathData="M20,52h68v5h-68z"/>
-    <path android:fillColor="#050505" android:pathData="M24,62h60a4,4 0,0 1,4 4v19h-68v-19a4,4 0,0 1,4 -4z"/>
-    <path android:fillColor="#D7A84B" android:pathData="M34,29h9v15h-9zM43,29h25v7h-25zM43,37h18v7h-18z"/>
-    <path android:fillColor="#D7A84B" android:pathData="M34,68h9v13h-9zM43,68h25v7h-25zM43,75h18v7h-18z"/>
-    <path android:fillColor="#000000" android:pathData="M49,48h10v10h-10z"/>
+
+    <!-- Minimal FLVY flap: black tile, gold frame, split seam and hinge. -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M20,20h68a8,8 0,0 1,8 8v52a8,8 0,0 1,-8 8h-68a8,8 0,0 1,-8 -8v-52a8,8 0,0 1,8 -8z"/>
+
+    <path
+        android:fillColor="#D7A84B"
+        android:pathData="M20,20h68a8,8 0,0 1,8 8v52a8,8 0,0 1,-8 8h-68a8,8 0 0 1,-8 -8v-52a8,8 0,0 1,8 -8zM20,25a3,3 0,0 0,-3 3v52a3,3 0,0 0,3 3h68a3,3 0,0 0,3 -3v-52a3,3 0,0 0,-3 -3z"/>
+
+    <path
+        android:fillColor="#D7A84B"
+        android:pathData="M17,51h74v6h-74z"/>
+
+    <path
+        android:fillColor="#D7A84B"
+        android:pathData="M51,48h6v12h-6z"/>
+
+    <path
+        android:fillColor="#000000"
+        android:pathData="M30,30h18v6h-12v9h11v6h-11v10h-6z"/>
+
+    <path
+        android:fillColor="#000000"
+        android:pathData="M60,30h7v28h13v7h-20z"/>
+
+    <path
+        android:fillColor="#000000"
+        android:pathData="M29,68h7l9,13h-8zM45,68h7l-9,13h-8zM60,68h7l7,13h-8zM73,68h7l-8,13h-8z"/>
+
+    <path
+        android:fillColor="#000000"
+        android:pathData="M49,51h10v6h-10z"/>
 </vector>
