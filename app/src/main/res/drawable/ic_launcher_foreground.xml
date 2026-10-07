@@ -5,36 +5,24 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Minimal FLVY flap: black tile, gold frame, split seam and hinge. -->
-    <path
-        android:fillColor="#000000"
-        android:pathData="M20,20h68a8,8 0,0 1,8 8v52a8,8 0,0 1,-8 8h-68a8,8 0,0 1,-8 -8v-52a8,8 0,0 1,8 -8z"/>
+    <!-- FLVY: a single physical split-flap card, with the name printed on the flap. -->
+    <path android:fillColor="#000000"
+        android:pathData="M18,18h72a10,10 0,0 1,10 10v52a10,10 0,0 1,-10 10h-72a10,10 0,0 1,-10 -10v-52a10,10 0,0 1,10 -10z"/>
 
-    <path
-        android:fillColor="#D7A84B"
-        android:pathData="M20,20h68a8,8 0,0 1,8 8v52a8,8 0,0 1,-8 8h-68a8,8 0 0 1,-8 -8v-52a8,8 0,0 1,8 -8zM20,25a3,3 0,0 0,-3 3v52a3,3 0,0 0,3 3h68a3,3 0,0 0,3 -3v-52a3,3 0,0 0,-3 -3z"/>
+    <path android:fillColor="#D7A84B"
+        android:pathData="M20,23h68a6,6 0,0 1,6 6v50a6,6 0,0 1,-6 6h-68a6,6 0,0 1,-6 -6v-50a6,6 0,0 1,6 -6z"/>
 
-    <path
-        android:fillColor="#D7A84B"
-        android:pathData="M17,51h74v6h-74z"/>
+    <!-- hinge / split -->
+    <path android:fillColor="#8E6728" android:pathData="M14,52h80v4h-80z"/>
+    <path android:fillColor="#000000" android:pathData="M51,49h6v10h-6z"/>
+    <path android:fillColor="#8E6728" android:pathData="M18,28h72v3h-72z"/>
 
-    <path
-        android:fillColor="#D7A84B"
-        android:pathData="M51,48h6v12h-6z"/>
+    <!-- FLVY -->
+    <path android:fillColor="#000000" android:pathData="M24,38h12v4h-7v5h6v4h-6v7h-5z"/>
+    <path android:fillColor="#000000" android:pathData="M39,38h5v16h7v4h-12z"/>
+    <path android:fillColor="#000000" android:pathData="M52,38h5l3,12 3,-12h5l-5,20h-6z"/>
+    <path android:fillColor="#000000" android:pathData="M70,38h5l3,7 3,-7h5l-6,12v8h-5v-8z"/>
 
-    <path
-        android:fillColor="#000000"
-        android:pathData="M30,30h18v6h-12v9h11v6h-11v10h-6z"/>
-
-    <path
-        android:fillColor="#000000"
-        android:pathData="M60,30h7v28h13v7h-20z"/>
-
-    <path
-        android:fillColor="#000000"
-        android:pathData="M29,68h7l9,13h-8zM45,68h7l-9,13h-8zM60,68h7l7,13h-8zM73,68h7l-8,13h-8z"/>
-
-    <path
-        android:fillColor="#000000"
-        android:pathData="M49,51h10v6h-10z"/>
+    <!-- tiny flap fasteners -->
+    <path android:fillColor="#000000" android:pathData="M18,76h72v3h-72z"/>
 </vector>
