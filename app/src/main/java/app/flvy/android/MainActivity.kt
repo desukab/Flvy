@@ -152,11 +152,12 @@ class MainActivity : Activity() {
     }
 
     private fun openNotificationSettings() {
+        val host = this
         val intent = if (android.os.Build.VERSION.SDK_INT >= 30) {
             Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS).apply {
                 putExtra(
                     Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME,
-                    ComponentName(this, FlvyNotificationListener::class.java)
+                    ComponentName(host, FlvyNotificationListener::class.java)
                 )
             }
         } else {
