@@ -18,6 +18,13 @@ jobs:
           test -f app/src/main/assets/splitflap/src/renderer.js
           test -f app/src/main/assets/splitflap/src/charset.js
           test -f app/src/main/assets/splitflap/index.html
+      - name: Add Fredoka brand font and generate launcher logo
+        run: |
+          mkdir -p app/src/main/assets app/src/main/res/drawable
+          curl -L --fail --retry 3 -o app/src/main/assets/Fredoka.ttf             https://raw.githubusercontent.com/PanicKk/Fredoka-Font/main/static/Fredoka-SemiBold.ttf
+          curl -L --fail --retry 3 -o app/src/main/assets/Fredoka-OFL.txt             https://raw.githubusercontent.com/PanicKk/Fredoka-Font/main/OFL.txt
+          command -v convert >/dev/null || (sudo apt-get update && sudo apt-get install -y imagemagick)
+          convert -size 108x108 xc:none -font app/src/main/assets/Fredoka.ttf             -fill black -pointsize 29 -gravity center -kerning 0 -annotate +0+0 "FLVY"             app/src/main/res/drawable/ic_launcher_foreground.png
       - uses: actions/setup-java@v5
         with: { distribution: temurin, java-version: '17' }
       - uses: android-actions/setup-android@v3
@@ -32,10 +39,10 @@ jobs:
       - name: Sign and verify
         run: |
           $ANDROID_HOME/build-tools/35.0.0/zipalign -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk app-release-aligned.apk
-          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks flvy-test.keystore --ks-pass pass:flvytest --key-pass pass:flvytest --out FLVY-0.4.0-test-signed.apk app-release-aligned.apk
-          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose FLVY-0.4.0-test-signed.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks flvy-test.keystore --ks-pass pass:flvytest --key-pass pass:flvytest --out FLVY-0.6.0-test-signed.apk app-release-aligned.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose FLVY-0.6.0-test-signed.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: FLVY-0.4.0-test-signed
-          path: FLVY-0.4.0-test-signed.apk
+          name: FLVY-0.6.0-test-signed
+          path: FLVY-0.6.0-test-signed.apk
           retention-days: 14
