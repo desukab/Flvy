@@ -39,10 +39,10 @@ jobs:
       - name: Sign and verify
         run: |
           $ANDROID_HOME/build-tools/35.0.0/zipalign -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk app-release-aligned.apk
-          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks flvy-test.keystore --ks-pass pass:flvytest --key-pass pass:flvytest --out FLVY-0.7.0-test-signed.apk app-release-aligned.apk
-          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose FLVY-0.7.0-test-signed.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks flvy-test.keystore --ks-pass pass:flvytest --key-pass pass:flvytest --out FLVY-0.8.0-test-signed.apk app-release-aligned.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose FLVY-0.8.0-test-signed.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: FLVY-0.7.0-test-signed
-          path: FLVY-0.7.0-test-signed.apk
+          name: FLVY-0.8.0-test-signed
+          path: FLVY-0.8.0-test-signed.apk
           retention-days: 14
