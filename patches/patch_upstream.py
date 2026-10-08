@@ -6,18 +6,6 @@ s = app.read_text()
 
 needle = "    this.bind();\n"
 insert = """    this.bind();
-
-    // FLVY is an AMOLED-first Android app. The upstream web app follows the
-    // phone/OS light-mode preference; that would create a white flash or chrome
-    // around the board. Keep the upstream editor fully functional but force its
-    // chrome to the dark token set whenever it asks to change theme.
-    const __flvyChromeTheme = this.chromeTheme.bind(this);
-    this.chromeTheme = () => {
-      __flvyChromeTheme();
-      document.documentElement.dataset.chrome = 'dark';
-    };
-    this.chromeTheme();
-
     // Native wallpaper renderer uses this to render the WebView only while the
     // actual MacLaine board is moving, avoiding a permanent 60fps render loop.
     window.__flvyBoardIdle = () => !this.board || this.board.isIdle();
@@ -74,19 +62,4 @@ cs = css.read_text()
 cs = cs.replace("--bg: #13151A;", "--bg: #000000;", 1)
 cs = cs.replace("html, body { margin: 0; background: #13151A; }",
                 "html, body { margin: 0; background: #000000; }", 1)
-
-# Never allow the upstream light chrome to leak into FLVY. Keep the board's
-# own look/theme intact; this only normalizes the surrounding UI/background.
-cs += """
-\n/* FLVY Android: dark-only chrome. The board look itself remains user-selectable. */
-html[data-chrome="light"] .sf {
-  --bg: #000000; --bg-2: #080808; --surface: #0A0A0A;
-  --text: #EDE6D6; --muted: #868991; --pale: #A3A8B0;
-  --accent: #C8974A; --accent-soft: rgba(200,151,74,0.12); --accent-line: rgba(200,151,74,0.38);
-  --danger: #E07A66; --danger-soft: rgba(224,122,102,0.12); --danger-line: rgba(224,122,102,0.45);
-  --border: rgba(237,230,214,0.08); --border-2: rgba(237,230,214,0.15);
-}
-html, body { background: #000000 !important; color-scheme: dark; }
-.sf-main, .sf-stage, .sf-canvas-wrap { background: #000000; }
-"""
 css.write_text(cs)
