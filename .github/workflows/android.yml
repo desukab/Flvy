@@ -43,6 +43,6 @@ jobs:
           $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose FLVY-0.7.0-test-signed.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: FLVY-0.6.0-test-signed
-          path: FLVY-0.6.0-test-signed.apk
+          name: FLVY-0.7.0-test-signed
+          path: FLVY-0.7.0-test-signed.apk
           retention-days: 14
