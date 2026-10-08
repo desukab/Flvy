@@ -56,6 +56,7 @@ class FlvyWallpaperService : WallpaperService() {
 
         override fun onCreate(holder: SurfaceHolder) {
             super.onCreate(holder)
+            holder.setFormat(android.graphics.PixelFormat.OPAQUE)
             createWebView()
         }
 
@@ -172,7 +173,10 @@ class FlvyWallpaperService : WallpaperService() {
             if (!holder.surface.isValid) return
             val canvas: Canvas = try { holder.lockCanvas() } catch (_: Exception) { null } ?: return
             try {
-                canvas.drawColor(Color.BLACK)
+                val amoled = getSharedPreferences("flvy", MODE_PRIVATE).getBoolean("amoled", true)
+                val bg = if (amoled) Color.BLACK else Color.rgb(8, 8, 8)
+                canvas.drawColor(bg)
+                web?.setBackgroundColor(bg)
                 web?.invalidate()
                 web?.draw(canvas)
             } finally {
