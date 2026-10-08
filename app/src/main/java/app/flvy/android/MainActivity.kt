@@ -51,6 +51,9 @@ class MainActivity : Activity() {
 
         web = WebView(this).apply {
             setBackgroundColor(Color.BLACK)
+            overScrollMode = View.OVER_SCROLL_NEVER
+            isVerticalScrollBarEnabled = false
+            isHorizontalScrollBarEnabled = false
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.mediaPlaybackRequiresUserGesture = false
@@ -165,7 +168,14 @@ class MainActivity : Activity() {
             action("Set as live wallpaper", "Use the real FLVY split-flap engine") { dialog.dismiss(); setLiveWallpaper() }
         }
 
-        section(page, "CONTENT", "Connect only what you choose.") {
+        section(page, "NOTIFICATION SOUND", "Give incoming messages the sound of a real board.") {
+            soundChoice(page, "Flap", "flap", "A short three-clack mechanical roll")
+            soundChoice(page, "Soft", "soft", "Quieter two-clack version")
+            soundChoice(page, "Tick", "tick", "Single crisp flap")
+            soundChoice(page, "Off", "off", "Silent notifications")
+        }
+
+        section(page, "CONTENT", "Connect only what you choose.")
             action("Notifications", "Show incoming messages on the board") { dialog.dismiss(); openNotificationSettings() }
             action("Location & weather", "Use device location for local content") { dialog.dismiss(); openLocationSettings() }
             action("Choose media", "Add your own images") { dialog.dismiss(); chooseMedia() }
@@ -202,6 +212,36 @@ class MainActivity : Activity() {
         })
     }
 
+    private fun soundChoice(parent: LinearLayout, title: String, value: String, detail: String) {
+        val selected = prefs.getString("notification_sound", "flap") == value
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(14), dp(8), dp(14), dp(8))
+            background = rounded(if (selected) Color.rgb(20, 20, 20) else Color.rgb(8, 8, 8),
+                if (selected) Color.rgb(75, 75, 75) else Color.rgb(28, 28, 28), 16)
+            isClickable = true
+            setOnClickListener {
+                prefs.edit().putString("notification_sound", value).apply()
+                FlvyNotificationSound.play(this@MainActivity)
+                showControlCenter()
+            }
+        }
+        val copy = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        copy.addView(TextView(this).apply {
+            text = title; textSize = 16f; setTextColor(Color.WHITE); typeface = fredoka
+        })
+        copy.addView(TextView(this).apply {
+            text = detail; textSize = 11f; setTextColor(Color.rgb(135, 135, 135))
+        })
+        row.addView(copy, LinearLayout.LayoutParams(0, dp(58), 1f))
+        row.addView(TextView(this).apply {
+            text = if (selected) "✓" else ""
+            textSize = 20f; setTextColor(Color.WHITE); gravity = Gravity.CENTER
+        }, LinearLayout.LayoutParams(dp(34), dp(58)))
+        parent.addView(row, LinearLayout.LayoutParams(-1, dp(66)).apply { bottomMargin = dp(6) })
+    }
+
     private fun section(parent: LinearLayout, title: String, detail: String, content: LinearLayout.() -> Unit) {
         parent.addView(TextView(this).apply {
             text = title; textSize = 11f; setTextColor(Color.rgb(150, 150, 150)); letterSpacing = 0.16f; typeface = fredoka
@@ -227,7 +267,8 @@ class MainActivity : Activity() {
         val black = prefs.getBoolean("amoled", true)
         val bg = if (black) "#000000" else "#080808"
         val flag = if (black) "1" else "0"
-        web.evaluateJavascript("(function(){document.documentElement.style.background='$bg';document.body.style.background='$bg';var s=document.querySelector('.sf');if(s)s.style.background='$bg';try{localStorage.setItem('flvy_amoled','$flag')}catch(e){}})();", null)
+        web.setBackgroundColor(if (black) Color.BLACK else Color.rgb(8, 8, 8))
+        web.evaluateJavascript("(function(){var bg='$bg';document.documentElement.dataset.chrome='dark';document.documentElement.style.backgroundColor=bg;document.body.style.backgroundColor=bg;document.documentElement.style.colorScheme='dark';var s=document.querySelector('.sf');if(s)s.style.backgroundColor=bg;try{localStorage.setItem('theme','dark');localStorage.setItem('flvy_amoled','$flag')}catch(e){}})();", null)
     }
 
     private fun setLiveWallpaper() {
