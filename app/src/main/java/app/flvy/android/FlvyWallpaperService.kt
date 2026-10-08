@@ -40,7 +40,7 @@ class FlvyWallpaperService : WallpaperService() {
                         scheduleRender()
                     }
                 }
-                handler.postDelayed(this, if (lowPower()) 180L else 90L)
+                handler.postDelayed(this, if (lowPower()) 120L else 60L)
             }
         }
 
@@ -141,7 +141,7 @@ class FlvyWallpaperService : WallpaperService() {
 
             web = WebView(this@FlvyWallpaperService).apply {
                 setBackgroundColor(backgroundColor())
-                setLayerType(View.LAYER_TYPE_HARDWARE, null)
+                setLayerType(View.LAYER_TYPE_SOFTWARE, null)
                 overScrollMode = View.OVER_SCROLL_NEVER
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
@@ -161,6 +161,7 @@ class FlvyWallpaperService : WallpaperService() {
 
                     override fun onPageFinished(view: WebView, url: String) {
                         applyWallpaperAppearance(view)
+                        view.post { layoutWebView(); render(); if (visible) scheduleRender() }
                     }
                 }
             }
@@ -202,8 +203,7 @@ class FlvyWallpaperService : WallpaperService() {
             val holder = surfaceHolder
             if (!holder.surface.isValid) return
             val canvas: Canvas = try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) holder.lockHardwareCanvas()
-                else holder.lockCanvas()
+                holder.lockCanvas()
             } catch (_: Exception) {
                 return
             }
