@@ -137,7 +137,7 @@ class MainActivity : Activity() {
             addView(Switch(this@MainActivity).apply {
                 text = "AMOLED black"; textSize = 16f; setTextColor(Color.WHITE); typeface = fredoka
                 isChecked = prefs.getBoolean("amoled", true)
-                setOnCheckedChangeListener { _, checked -> prefs.edit().putBoolean("amoled", checked).apply(); applyDisplayFlags() }
+                setOnCheckedChangeListener { _, checked -> prefs.edit().putBoolean("amoled", checked).apply(); applyDisplayFlags(); web.invalidate() }
             }, LinearLayout.LayoutParams(-1, dp(56)))
         }
 
@@ -168,7 +168,6 @@ class MainActivity : Activity() {
         section(page, "CONTENT", "Connect only what you choose.") {
             action("Notifications", "Show incoming messages on the board") { dialog.dismiss(); openNotificationSettings() }
             action("Location & weather", "Use device location for local content") { dialog.dismiss(); openLocationSettings() }
-            action("Choose media", "Add your own images") { dialog.dismiss(); chooseMedia() }
         }
 
         section(page, "ANDROID", "System-level controls.") {
