@@ -175,7 +175,7 @@ class MainActivity : Activity() {
             soundChoice(page, "Off", "off", "Silent notifications")
         }
 
-        section(page, "CONTENT", "Connect only what you choose.")
+        section(page, "CONTENT", "Connect only what you choose.") {
             action("Notifications", "Show incoming messages on the board") { dialog.dismiss(); openNotificationSettings() }
             action("Location & weather", "Use device location for local content") { dialog.dismiss(); openLocationSettings() }
             action("Choose media", "Add your own images") { dialog.dismiss(); chooseMedia() }
