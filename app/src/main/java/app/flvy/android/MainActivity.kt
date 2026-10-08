@@ -224,7 +224,7 @@ class MainActivity : Activity() {
             setOnClickListener {
                 prefs.edit().putString("notification_sound", value).apply()
                 FlvyNotificationSound.play(this@MainActivity)
-                showControlCenter()
+                // Keep the settings sheet open; the next open reflects the new selection.
             }
         }
         val copy = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
